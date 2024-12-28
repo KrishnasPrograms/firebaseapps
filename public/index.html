@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Particles</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(120deg, #ff9a9e, #fad0c4);
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas></canvas>
+    <script>
+        const canvas = document.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particlesArray = [];
+
+        // Particle class
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 8 + 2; // Random size
+                this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                this.velocityX = (Math.random() - 0.5) * 3; // Random speed
+                this.velocityY = (Math.random() - 0.5) * 3;
+                this.opacity = 1; // Start fully visible
+            }
+
+            update() {
+                this.x += this.velocityX;
+                this.y += this.velocityY;
+                this.size *= 0.95; // Gradually shrink
+                this.opacity -= 0.02; // Gradually fade
+                if (this.opacity <= 0 || this.size <= 0.5) {
+                    this.opacity = 0;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${Math.random() * 255}, ${Math.random() * 255
+                    }, ${Math.random() * 255}, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+
+        // Add particles on interaction
+        function createParticles(x, y) {
+            for (let i = 0; i < 5; i++) {
+                particlesArray.push(new Particle(x, y));
+            }
+        }
+
+        // Handle mouse move
+        canvas.addEventListener('mousemove', (event) => {
+            createParticles(event.clientX, event.clientY);
+        });
+
+        // Handle touch move
+        canvas.addEventListener('touchmove', (event) => {
+            const touch = event.touches[0];
+            createParticles(touch.clientX, touch.clientY);
+        });
+
+        // Animate particles
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particlesArray.forEach((particle, index) => {
+                if (particle.opacity > 0) {
+                    particle.update();
+                    particle.draw();
+                } else {
+                    particlesArray.splice(index, 1); // Remove invisible particles
+                }
+            });
+            requestAnimationFrame(animate);
+        }
+
+        // Resize canvas
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        animate(); // Start the animation loop
+    </script>
+</body>
+</html>
